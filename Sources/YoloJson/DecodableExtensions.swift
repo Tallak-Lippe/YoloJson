@@ -22,9 +22,16 @@ public extension Decodable {
 
     var array: [Decodable] {
         if let data = self as? Data {
-            return try! JSONDecoder().decode([JSONAny].self, from: data)
+            do {
+                return try JSONDecoder().decode([JSONAny].self, from: data)
+            } catch {
+                fatalError("Couldn't decode data into an array")
+            }
         } else {
-            return unwrapJsonAny(self) as! [Decodable]
+            guard let result = unwrapJsonAny(self) as? [Decodable] else {
+                fatalError("Tried to unwrap value of type \(type(of: unwrapJsonAny(self))) as an array.")
+            }
+            return result
         }
     }
     
@@ -35,9 +42,17 @@ public extension Decodable {
     ///If the dictionary contains dictionaries or arrays, these will be wrapped in a JSONAny. If this api is used to access these elements too, the unwrapping will be taken care of.
     var dictionary: [String : Decodable] {
         if let data = self as? Data {
-            return try! JSONDecoder().decode([String : JSONAny].self, from: data)
+            do {
+                return try JSONDecoder().decode([String : JSONAny].self, from: data)
+            } catch {
+                fatalError("Couldn't decode data into a dictionary")
+            }
+            
         } else {
-            return unwrapJsonAny(self) as! [String : Decodable]
+            guard let result = unwrapJsonAny(self) as? [String : Decodable] else {
+                fatalError("Tried to unwrap value of type \(type(of: unwrapJsonAny(self))) as a dictionary.")
+            }
+            return result
         }
     }
     
@@ -52,7 +67,10 @@ public extension Decodable {
     ///
     ///This is one of the two major points of failure. If the key passed isn't in the dictionary, or there isn't a dictionary here, the application will crash.
     subscript(index: String) -> Decodable {
-        return unwrapJsonAny(dictionary[index]!)
+        guard let value = dictionary[index] else {
+            fatalError(#"The key "\#(index)" isn't present in the dictionary. All the available keys are: \#(dictionary.keys)"#)
+        }
+        return unwrapJsonAny(value)
     }
     
     //If the value is of type JSONAny, unwrap it but make sure it is still Decodable
