@@ -7,6 +7,14 @@
 
 import Foundation
 
+enum JsonError: Error {
+    case dictionaryDecodingError
+    case arrayDecodingError
+    case arrayOutOfBounds
+    case keyNotPresent
+    case typeMismatch
+}
+
 public extension Decodable {
     ///Returns a copy of self casted as a Decodable array
     ///
@@ -21,18 +29,21 @@ public extension Decodable {
     ///If the array contains arrays or dictionaries, these will be wrapped in a JSONAny. If this api is used to access these elements too, the unwrapping will be taken care of.
 
     var array: [Decodable] {
-        if let data = self as? Data {
-            do {
-                return try JSONDecoder().decode([JSONAny].self, from: data)
-            } catch {
-                fatalError("Couldn't decode data into an array")
+        get throws {
+            if let data = self as? Data {
+                do {
+                    return try JSONDecoder().decode([JSONAny].self, from: data)
+                } catch {
+                    fatalError("Couldn't decode data into an array")
+                }
+            } else {
+                guard let result = unwrapJsonAny(self) as? [Decodable] else {
+                    fatalError("Tried to unwrap value of type \(type(of: unwrapJsonAny(self))) as an array.")
+                }
+                return result
             }
-        } else {
-            guard let result = unwrapJsonAny(self) as? [Decodable] else {
-                fatalError("Tried to unwrap value of type \(type(of: unwrapJsonAny(self))) as an array.")
-            }
-            return result
         }
+        
     }
     
     ///Returns a copy of self casted as a Decodable dictionary with String keys
@@ -41,18 +52,20 @@ public extension Decodable {
     ///This will crash the application if the data can't be decoded or if self is something else then a Dictionary.
     ///If the dictionary contains dictionaries or arrays, these will be wrapped in a JSONAny. If this api is used to access these elements too, the unwrapping will be taken care of.
     var dictionary: [String : Decodable] {
-        if let data = self as? Data {
-            do {
-                return try JSONDecoder().decode([String : JSONAny].self, from: data)
-            } catch {
-                fatalError("Couldn't decode data into a dictionary")
+        get throws {
+            if let data = self as? Data {
+                do {
+                    return try JSONDecoder().decode([String : JSONAny].self, from: data)
+                } catch {
+                    fatalError("Couldn't decode data into a dictionary")
+                }
+                
+            } else {
+                guard let result = unwrapJsonAny(self) as? [String : Decodable] else {
+                    fatalError("Tried to unwrap value of type \(type(of: unwrapJsonAny(self))) as a dictionary.")
+                }
+                return result
             }
-            
-        } else {
-            guard let result = unwrapJsonAny(self) as? [String : Decodable] else {
-                fatalError("Tried to unwrap value of type \(type(of: unwrapJsonAny(self))) as a dictionary.")
-            }
-            return result
         }
     }
     
@@ -60,17 +73,21 @@ public extension Decodable {
     ///
     ///This is one of the two major points of failure. You can get an Index out of range exception, and the application can crash because this actually isn't an array.
     subscript(index: Int) -> Decodable{
-        return unwrapJsonAny(array[index])
+        get throws {
+            return unwrapJsonAny(try array[index])
+        }
     }
     
     ///Acces as a dictionary.
     ///
     ///This is one of the two major points of failure. If the key passed isn't in the dictionary, or there isn't a dictionary here, the application will crash.
     subscript(index: String) -> Decodable {
-        guard let value = dictionary[index] else {
-            fatalError(#"The key "\#(index)" isn't present in the dictionary. All the available keys are: \#(dictionary.keys)"#)
+        get throws {
+            guard let value = try dictionary[index] else {
+                fatalError(#"The key "\#(index)" isn't present in the dictionary. All the available keys are: \#(try! dictionary.keys)"#)
+            }
+            return unwrapJsonAny(value)
         }
-        return unwrapJsonAny(value)
     }
     
     //If the value is of type JSONAny, unwrap it but make sure it is still Decodable
