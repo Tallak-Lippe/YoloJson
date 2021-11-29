@@ -3,7 +3,6 @@
 YoloJson makes scripting with JSON much easier. It is perfect for getting only a few values from an api without recreating the whole json structure. You simply write the path to the value  you want and cast the it like this:
 
 ```swift
-
 let data = //Some networking code
 
 let ID = try data["_embedded"]["recommendations"][0]["series"]["id"] as! String
@@ -23,6 +22,5 @@ Using this api will throw an error under a few circumstances:
 * Index out of range in array access
 * Key not present in dictionary under dictionary access
 
-Please let me know @TallakLippe on twitter or create a PR if there is anything I can / should improve. I will work on some more descriptive error-messages soon.
+I am open for PRs and comments with suggestions and improvements
 
-The examples here are made and tested with json data from NRK.
