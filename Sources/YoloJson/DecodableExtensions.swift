@@ -22,12 +22,12 @@ public extension Decodable {
     ///The main use of this would be to access convenient array functions as map, filter and reduce as well as to be able to loop over the elements.
     ///You can continue using this library inside a loop or any array functions like this:
     ///````
-    ///let allIDs: [String] = data["_embedded"]["recommendations"].array.map {
+    ///let allIDs: [String] = try data["_embedded"]["recommendations"].array.map {
     ///    $0["series"]["id"] as! String
     ///}
     ///````
-    ///Using this property will crash the application if the data can't be decoded or if self is something else then an array
-    ///If the array contains arrays or dictionaries, these will be wrapped in a JSONAny. If this api is used to access these elements too, the unwrapping will be taken care of.
+    ///This will throw an error if the data can't be decoded or if the object isn't an array
+    ///If the array contains arrays or dictionaries, these will be wrapped in a JSONAny. These will be unwrapped if handled by this api.
     var array: [Decodable] {
         get throws {
             if let data = self as? Data {
@@ -49,8 +49,8 @@ public extension Decodable {
     ///Returns a copy of self casted as a Decodable dictionary with String keys
     ///
     ///The main use of this would be to access convenient dictionary functions as mapValues as well as to be able to loop over the elements.
-    ///This will crash the application if the data can't be decoded or if self is something else then a Dictionary.
-    ///If the dictionary contains dictionaries or arrays, these will be wrapped in a JSONAny. If this api is used to access these elements too, the unwrapping will be taken care of.
+    ///This will throw an error if the data can't be decoded or the object isn't a Dictionary.
+    ///If the dictionary contains dictionaries or arrays, these will be wrapped in a JSONAny. These will be unwrapped if handled by this api.
     var dictionary: [String : Decodable] {
         get throws {
             if let data = self as? Data {
@@ -71,7 +71,7 @@ public extension Decodable {
     
     ///Acces as an array
     ///
-    ///This is one of the two major points of failure. You can get an Index out of range exception, and the application can crash because this actually isn't an array.
+    ///Will throw an error if this objects isn't an array,  if the array can't be decoded or if the index is out of range
     subscript(index: Int) -> Decodable{
         get throws {
             let array = try array
@@ -85,7 +85,7 @@ public extension Decodable {
     
     ///Acces as a dictionary.
     ///
-    ///This is one of the two major points of failure. If the key passed isn't in the dictionary, or there isn't a dictionary here, the application will crash.
+    ///Will throw an error if this object isn't a dictionary, if the dictionary can't be decoded or if the key isn't present i the dictionary
     subscript(index: String) -> Decodable {
         get throws {
             guard let value = try dictionary[index] else {
