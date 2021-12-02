@@ -8,8 +8,8 @@
 import Foundation
 
 enum JSONError: Error {
-    case dictionaryDecodingError(String)
-    case arrayDecodingError(String)
+    case decodingError(String)
+    case castingError(String)
     case indexOutOfRange(String)
     case keyNotPresent(String)
     case other(String)
@@ -17,6 +17,22 @@ enum JSONError: Error {
 
 
 public extension Decodable {
+    
+    func cast<T: Decodable>(to type: T.Type) throws -> T  {
+        if let data = self as? Data {
+            do {
+                return try JSONDecoder().decode(type, from: data)
+            } catch {
+                throw JSONError.decodingError("Couldn't decode data into a \(type), Data: \n\(String(data: data, encoding: .utf8) ?? "nil")\n JSONDecoder Description: \n\(error.localizedDescription)")
+            }
+        } else {
+            guard let result = try unwrapJsonAny(self) as? T else {
+                throw JSONError.castingError("Tried to unwrap value of type \(Swift.type(of: try unwrapJsonAny(self))) as \(type).")
+            }
+            return result
+        }
+    }
+    
     ///Returns a copy of self casted as a Decodable array
     ///
     ///The main use of this would be to access convenient array functions as map, filter and reduce as well as to be able to loop over the elements.
