@@ -1,6 +1,6 @@
 # YoloJson
 
-YoloJson makes scripting with JSON much easier. It is perfect for getting only a few values from an api without recreating the whole json structure. You simply write the path to the value  you want and cast the it like this:
+YoloJson makes scripting with JSON much easier. It is perfect for getting only a few values from an api without recreating the whole json structure. You simply write the path to the value you want and cast the it like this:
 
 ```swift
 let data = //Some networking code
