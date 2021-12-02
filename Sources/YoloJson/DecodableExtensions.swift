@@ -46,18 +46,7 @@ public extension Decodable {
     ///If the array contains arrays or dictionaries, these will be wrapped in a JSONAny. These will be unwrapped if handled by this api.
     var array: [Decodable] {
         get throws {
-            if let data = self as? Data {
-                do {
-                    return try JSONDecoder().decode([JSONAny].self, from: data)
-                } catch {
-                    throw JSONError.arrayDecodingError("Couldn't decode data into an array, Data: \n\(String(data: data, encoding: .utf8) ?? "nil")\n JSONDecoder Description: \n\(error.localizedDescription)")
-                }
-            } else {
-                guard let result = try unwrapJsonAny(self) as? [Decodable] else {
-                    throw JSONError.arrayDecodingError("Tried to unwrap value of type \(type(of: try unwrapJsonAny(self))) as an array.")
-                }
-                return result
-            }
+            try cast(to: [JSONAny].self)
         }
         
     }
@@ -69,19 +58,7 @@ public extension Decodable {
     ///If the dictionary contains dictionaries or arrays, these will be wrapped in a JSONAny. These will be unwrapped if handled by this api.
     var dictionary: [String : Decodable] {
         get throws {
-            if let data = self as? Data {
-                do {
-                    return try JSONDecoder().decode([String : JSONAny].self, from: data)
-                } catch {
-                    throw JSONError.dictionaryDecodingError("Couldn't decode data into a dictionary, Data: \n\(String(data: data, encoding: .utf8) ?? "nil")\n Description: \n\(error.localizedDescription)")
-                }
-                
-            } else {
-                guard let result = try unwrapJsonAny(self) as? [String : Decodable] else {
-                    throw JSONError.dictionaryDecodingError("Tried to unwrap value of type \(type(of: try unwrapJsonAny(self))) as a dictionary.")
-                }
-                return result
-            }
+            try cast(to: [String : JSONAny].self)
         }
     }
     
