@@ -18,6 +18,11 @@ enum JSONError: Error {
 
 public extension Decodable {
     
+    
+    ///Returns the current value as the given type if possible.
+    ///If the current value is Data, it will be decoded, and not directly casted.
+    ///
+    ///Will throw an error if the value is the wrong type, or if it can't be decoded.
     func cast<T: Decodable>(to type: T.Type) throws -> T  {
         if let data = self as? Data {
             do {
