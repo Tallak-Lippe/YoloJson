@@ -26,7 +26,7 @@ public extension Decodable {
     func cast<T: Decodable>(to type: T.Type) throws -> T  {
         if let data = self as? Data {
             do {
-                return try JSONDecoder().decode(type, from: data)
+                return try YoloJsonConfig.decoder.decode(type, from: data)
             } catch {
                 throw JSONError.decodingError("Couldn't decode data into a \(type), Data: \n\(String(data: data, encoding: .utf8) ?? "nil")\n JSONDecoder Description: \n\(error.localizedDescription)")
             }
