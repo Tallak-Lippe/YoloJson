@@ -5,7 +5,7 @@ YoloJson makes scripting with JSON much easier. It is perfect for getting only a
 ```swift
 let data = //Some networking code
 
-let ID = try data["_embedded"]["recommendations"][0]["series"]["id"].cast(to: String.self)
+let ID = try data["_embedded"]["recommendations"][0]["series"]["id"].string
 ```
 ## Installation
 ### Swift package manager
@@ -26,6 +26,20 @@ You can also access whole arrays and dictionaries to use powerful functions like
 let allIDs: [String] = try data["_embedded"]["recommendations"].array.flatMap {
     try? $0["series"]["id"].cast(to: String.self)
 }
+```
+These are essentially just shorthands for the cast function. Similar ones exist for common types like Int, Double and String. These let you do stuff like this:
+```swift
+
+let ID = try data["_embedded"]["recommendations"][0]["series"]["id"].string
+```
+The cast function is still useful for casting to you own Decodable / Codable types.
+```swift 
+struct User: Decodable {
+    let name: String
+    let age: Int
+}
+
+let firstUser = try data["users"][0].cast(to: User.self)
 ```
 
 ### Errors
