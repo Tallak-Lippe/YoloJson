@@ -23,20 +23,31 @@ public extension Decodable {
     ///If the current value is Data, it will be decoded, and not directly casted.
     ///
     ///Will throw an error if the value is the wrong type, or if it can't be decoded.
+    
     func cast<T: Decodable>(to type: T.Type) throws -> T  {
         if let data = self as? Data {
             do {
                 return try YoloJsonConfig.decoder.decode(type, from: data)
             } catch {
-                throw JSONError.decodingError("Couldn't decode data into a \(type), Data: \n\(String(data: data, encoding: .utf8) ?? "nil")\n JSONDecoder Description: \n\(error.localizedDescription)")
+                throw JSONError.decodingError("Couldn't decode data into a \(type), Data: \n\(String(data: data, encoding: .utf8) ?? "nil")\n Decoder Description: \n\(error.localizedDescription)")
             }
         } else {
-            guard let result = try unwrapJsonAny(self) as? T else {
-                throw JSONError.castingError("Tried to unwrap value of type \(Swift.type(of: try unwrapJsonAny(self))) as \(type).")
+            if let result = try unwrapJsonAny(self) as? T {
+                return result
+            } else if let result = self as? [String: JSONAny] {
+                do {
+                    let data = try JSONEncoder().encode(result)
+
+                    return try JSONDecoder().decode(type, from: data)
+                } catch {
+                    throw JSONError.decodingError("Custom type decoding didn't work. Check that you type matches the type in you data. \n Decoder Description: \n\(error.localizedDescription)")
+                }
             }
-            return result
+        
+            throw JSONError.castingError("Tried to unwrap value of type \(Swift.type(of: try unwrapJsonAny(self))) as \(type).")
         }
     }
+    
     
     ///Acces as an array
     ///
