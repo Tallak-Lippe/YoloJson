@@ -13,11 +13,11 @@ You can install YoloJson via the [Swift Package Manager](https://swift.org/packa
 
 
 ## Usage
-Use the two subscripts for arrays and dictionaries to chain together the path to the object you wan't. The framework will do all the casting and decoding to the correct data types for you.
+There are a few steps to access values in your JSON data with this package. First, use the two subscripts for arrays and dictionaries to chain together the path to the object you want. The framework will do all the casting and decoding to the correct types for you.
 ```swift
 try data["_embedded"]["recommendations"][0]["series"]["id"]
 ```
-Then cast the object to the type you wan't and store it in a variable
+Then cast the object to the type you want and store it in a variable
 ```swift
 let ID = try data["_embedded"]["recommendations"][0]["series"]["id"].cast(to: String.self)
 ```
@@ -33,6 +33,7 @@ Using this api will throw an error under a few circumstances:
 * The data can't be decoded by swift's JSONDecoder
 * Data that isn't an array is accessed like an array with "subscript(index: Int)"
 * Data that isn't a dictionary is accessed like a dictionary "subscript(key: String)"
+* The type passed to the cast function doesn't match the type of the actual underlying data.
 * Index out of range in array access
 * Key not present in dictionary under dictionary access
 
